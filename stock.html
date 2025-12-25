@@ -9,23 +9,110 @@
 
 <body class="bg-gray-100">
 
-    <div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8">
 
-        <h1 class="text-3xl font-bold mb-6">📦 Stok Yönetimi</h1>
+    <h1 class="text-3xl font-bold mb-6">📦 Stok Yönetimi</h1>
 
-        <a href="index.html"
-           class="inline-block mb-6 text-blue-600 hover:underline">
-            ← Ana Sayfaya Dön
-        </a>
+    <a href="index.html" class="text-blue-600 hover:underline mb-6 inline-block">
+        ← Ana Sayfaya Dön
+    </a>
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <p class="text-gray-600">
-                Burası stok sayfası.  
-                Buraya ürün listesi, adet, fiyat vs. eklenecek.
-            </p>
+    <!-- Ürün Ekle -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+        <h2 class="text-xl font-semibold mb-4">Ürün Ekle</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input id="name" type="text" placeholder="Ürün adı"
+                   class="border rounded px-3 py-2">
+
+            <input id="qty" type="number" placeholder="Adet"
+                   class="border rounded px-3 py-2">
+
+            <input id="price" type="number" placeholder="Fiyat"
+                   class="border rounded px-3 py-2">
+
+            <button onclick="addProduct()"
+                    class="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600">
+                Ekle
+            </button>
         </div>
-
     </div>
+
+    <!-- Ürün Listesi -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-xl font-semibold mb-4">Ürünler</h2>
+
+        <table class="w-full border">
+            <thead class="bg-gray-100">
+            <tr>
+                <th class="border px-3 py-2">Ürün</th>
+                <th class="border px-3 py-2">Adet</th>
+                <th class="border px-3 py-2">Fiyat</th>
+                <th class="border px-3 py-2">Sil</th>
+            </tr>
+            </thead>
+            <tbody id="productList"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+
+    function save() {
+        localStorage.setItem("products", JSON.stringify(products));
+    }
+
+    function render() {
+        const list = document.getElementById("productList");
+        list.innerHTML = "";
+
+        products.forEach((p, i) => {
+            list.innerHTML += `
+                <tr>
+                    <td class="border px-3 py-2">${p.name}</td>
+                    <td class="border px-3 py-2">${p.qty}</td>
+                    <td class="border px-3 py-2">${p.price} ₺</td>
+                    <td class="border px-3 py-2 text-center">
+                        <button onclick="removeProduct(${i})"
+                                class="text-red-600 hover:underline">
+                            Sil
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function addProduct() {
+        const name = document.getElementById("name").value;
+        const qty = document.getElementById("qty").value;
+        const price = document.getElementById("price").value;
+
+        if (!name || !qty || !price) {
+            alert("Tüm alanları doldur");
+            return;
+        }
+
+        products.push({ name, qty, price });
+        save();
+        render();
+
+        document.getElementById("name").value = "";
+        document.getElementById("qty").value = "";
+        document.getElementById("price").value = "";
+    }
+
+    function removeProduct(index) {
+        products.splice(index, 1);
+        save();
+        render();
+    }
+
+    render();
+</script>
 
 </body>
 </html>
+
