@@ -1,161 +1,136 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stok Yönetimi</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beylikdüzü Akademi Kitap Kırtasiye</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-
 <body class="bg-gray-100">
 
-<div class="container mx-auto px-4 py-8">
+<!-- HEADER -->
+<header class="bg-blue-900 text-white p-4 flex justify-between">
+  <h1 class="text-xl font-bold">Beylikdüzü Akademi Kırtasiye</h1>
+  <button onclick="toggleCart()" class="bg-white text-blue-900 px-3 py-1 rounded">🛒 Sepet (<span id="cartCount">0</span>)</button>
+</header>
 
-    <h1 class="text-3xl font-bold mb-4">📦 Stok Yönetimi</h1>
+<!-- HERO -->
+<section class="text-center p-8 bg-blue-100">
+  <h2 class="text-2xl font-bold">Kırtasiye • Kitap • Ofis</h2>
+  <p>Uygun fiyat – Hızlı alışveriş</p>
+</section>
 
-    <a href="index.html" class="text-blue-600 hover:underline mb-6 inline-block">
-        ← Ana Sayfaya Dön
-    </a>
+<!-- PRODUCTS -->
+<section class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="bg-white p-4 rounded shadow">
+    <h3 class="font-bold">Spiralli Defter</h3>
+    <p>45 TL</p>
+    <button onclick="addToCart('Spiralli Defter',45)" class="mt-2 bg-blue-900 text-white px-3 py-1 rounded">Sepete Ekle</button>
+  </div>
+  <div class="bg-white p-4 rounded shadow">
+    <h3 class="font-bold">Tükenmez Kalem</h3>
+    <p>10 TL</p>
+    <button onclick="addToCart('Tükenmez Kalem',10)" class="mt-2 bg-blue-900 text-white px-3 py-1 rounded">Sepete Ekle</button>
+  </div>
+  <div class="bg-white p-4 rounded shadow">
+    <h3 class="font-bold">Hikaye Kitabı</h3>
+    <p>85 TL</p>
+    <button onclick="addToCart('Hikaye Kitabı',85)" class="mt-2 bg-blue-900 text-white px-3 py-1 rounded">Sepete Ekle</button>
+  </div>
+</section>
 
-    <!-- Ürün Ekle / Düzenle -->
-    <div class="bg-white rounded shadow p-6 mb-8">
-        <h2 class="text-xl font-semibold mb-4">Ürün Ekle / Düzenle</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <input id="name" type="text" placeholder="Ürün Adı" class="border rounded px-3 py-2">
-            <input id="qty" type="number" placeholder="Adet" class="border rounded px-3 py-2">
-            <input id="price" type="number" placeholder="Fiyat" class="border rounded px-3 py-2">
-            <button onclick="addOrUpdate()"
-                    class="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600">
-                Kaydet
-            </button>
-        </div>
-    </div>
-
-    <!-- Toplam Değer -->
-    <div class="mb-4 text-lg font-semibold">
-        Toplam Stok Değeri: <span id="total">0</span> ₺
-    </div>
-
-    <!-- Liste -->
-    <div class="bg-white rounded shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">Ürün Listesi</h2>
-
-        <table class="w-full border">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="border px-3 py-2">Ürün</th>
-                    <th class="border px-3 py-2">Adet</th>
-                    <th class="border px-3 py-2">Fiyat</th>
-                    <th class="border px-3 py-2">İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="list"></tbody>
-        </table>
-
-        <button onclick="exportCSV()"
-                class="mt-4 bg-gray-700 text-white px-4 py-2 rounded">
-            CSV İndir
-        </button>
-    </div>
-
+<!-- CART -->
+<div id="cart" class="hidden fixed right-0 top-0 h-full w-80 bg-white shadow p-4">
+  <h2 class="text-lg font-bold">Sepet</h2>
+  <ul id="cartItems" class="mt-2"></ul>
+  <p class="font-bold mt-2">Toplam: <span id="total">0</span> TL</p>
+  <button class="bg-green-600 text-white w-full py-2 mt-3 rounded">Sipariş Ver</button>
 </div>
 
+<!-- ADMIN -->
+<section class="p-6 bg-gray-200">
+  <h2 class="text-xl font-bold">🔐 Hızlı Stok Ekleme (Admin)</h2>
+  <div class="flex gap-2 flex-wrap">
+    <input id="urunAdi" placeholder="Ürün adı" class="p-2 border rounded" />
+    <input id="urunFiyat" type="number" placeholder="Fiyat" class="p-2 border rounded" />
+    <input id="urunStok" type="number" placeholder="Stok Adedi" class="p-2 border rounded" />
+    <button onclick="adminAddProduct()" class="bg-blue-900 text-white px-4 py-2 rounded">Kaydet</button>
+  </div>
+  <div id="adminProducts" class="mt-4 space-y-2"></div>
+</section>
+
+<footer class="bg-black text-white text-center p-3">© 2025 Beylikdüzü Akademi Kitap Kırtasiye</footer>
+
 <script>
-    let products = JSON.parse(localStorage.getItem("products")) || [];
-    let editIndex = -1;
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let products = JSON.parse(localStorage.getItem('products')) || [];
+let total = 0;
 
-    function save() {
-        localStorage.setItem("products", JSON.stringify(products));
-    }
+function saveProducts(){
+  localStorage.setItem('products', JSON.stringify(products));
+}
 
-    function render() {
-        const list = document.getElementById("list");
-        list.innerHTML = "";
+function renderProducts(){
+  const container = document.querySelector('section.p-6.grid');
+  container.innerHTML='';
+  products.forEach((p,index)=>{
+    const div=document.createElement('div');
+    div.className='bg-white p-4 rounded shadow';
+    div.innerHTML=<h3 class='font-bold'>${p.name}</h3><p>${p.price} TL</p><p>Stok: ${p.stock}</p><button onclick="addToCart(${index})" class='mt-2 bg-blue-900 text-white px-3 py-1 rounded'>Sepete Ekle</button>;
+    container.appendChild(div);
+  });
+}
 
-        products.forEach((p, i) => {
-            list.innerHTML += `
-                <tr>
-                    <td class="border px-3 py-2">${p.name}</td>
-                    <td class="border px-3 py-2">${p.qty}</td>
-                    <td class="border px-3 py-2">${p.price} ₺</td>
-                    <td class="border px-3 py-2 space-x-2">
-                        <button onclick="edit(${i})" class="text-blue-600">Düzenle</button>
-                        <button onclick="remove(${i})" class="text-red-600">Sil</button>
-                    </td>
-                </tr>
-            `;
-        });
+function addToCart(index){
+  if(products[index].stock<=0) return alert('Stok yok');
+  products[index].stock--;
+  cart.push(products[index]);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  document.getElementById('cartCount').innerText = cart.length;
+  saveProducts();
+  renderProducts();
+  renderCart();
+}
 
-        total();
-    }
+function renderCart(){
+  const list=document.getElementById('cartItems');
+  list.innerHTML=''; total=0;
+  cart.forEach(item=>{
+    total+=Number(item.price);
+    const li=document.createElement('li');
+    li.innerText=${item.name} - ${item.price} TL;
+    list.appendChild(li);
+  });
+  document.getElementById('total').innerText=total;
+}
 
-    function addOrUpdate() {
-        const name = document.getElementById("name").value;
-        const qty = Number(document.getElementById("qty").value);
-        const price = Number(document.getElementById("price").value);
+function toggleCart(){
+  document.getElementById('cart').classList.toggle('hidden');
+}
 
-        if (!name || qty <= 0 || price <= 0) {
-            alert("Tüm alanları doldur");
-            return;
-        }
+function adminAddProduct(){
+  const name=urunAdi.value;
+  const price=urunFiyat.value;
+  const stock=urunStok.value;
+  if(!name||!price||!stock) return alert('Boş bırakma');
+  products.push({name,price,stock});
+  saveProducts();
+  renderProducts();
+  adminRender();
+  urunAdi.value=urunFiyat.value=urunStok.value='';
+}
 
-        if (editIndex === -1) {
-            products.push({ name, qty, price });
-        } else {
-            products[editIndex] = { name, qty, price };
-            editIndex = -1;
-        }
+function adminRender(){
+  const div=document.getElementById('adminProducts');
+  div.innerHTML='';
+  products.forEach(p=>{
+    div.innerHTML+=<div class='bg-white p-2 rounded shadow'>${p.name} | ${p.price} TL | Stok: ${p.stock}</div>;
+  });
+}
 
-        clear();
-        save();
-        render();
-    }
-
-    function edit(i) {
-        const p = products[i];
-        document.getElementById("name").value = p.name;
-        document.getElementById("qty").value = p.qty;
-        document.getElementById("price").value = p.price;
-        editIndex = i;
-    }
-
-    function remove(i) {
-        products.splice(i, 1);
-        save();
-        render();
-    }
-
-    function total() {
-        let t = products.reduce((sum, p) => sum + p.qty * p.price, 0);
-        document.getElementById("total").innerText = t;
-    }
-
-    function clear() {
-        document.getElementById("name").value = "";
-        document.getElementById("qty").value = "";
-        document.getElementById("price").value = "";
-    }
-
-    function exportCSV() {
-        let csv = "Ürün,Adet,Fiyat\n";
-        products.forEach(p => {
-            csv += ${p.name},${p.qty},${p.price}\n;
-        });
-
-        const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "stok.csv";
-        a.click();
-    }
-
-    render();
+renderProducts();
+adminRender();
 </script>
 
 </body>
 </html>
-       
-            
-
-        
